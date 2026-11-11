@@ -25,14 +25,18 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Restore YouTube OAuth Credentials from GitHub Secrets
-        if: env.YOUTUBE_CLIENT_SECRET != '' && env.YOUTUBE_TOKEN != ''
         env:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_TOKEN: ${{ secrets.YOUTUBE_TOKEN }}
         shell: pwsh
         run: |
-          $env:YOUTUBE_CLIENT_SECRET | Out-File -FilePath "client_secret.json" -Encoding utf8
-          $env:YOUTUBE_TOKEN | Out-File -FilePath "youtube-token.json" -Encoding utf8
+          if ($env:YOUTUBE_CLIENT_SECRET -and $env:YOUTUBE_TOKEN) {
+            [System.IO.File]::WriteAllText("$PWD\client_secret.json", $env:YOUTUBE_CLIENT_SECRET)
+            [System.IO.File]::WriteAllText("$PWD\youtube-token.json", $env:YOUTUBE_TOKEN)
+            Write-Output "✅ YouTube OAuth credentials restored from GitHub Secrets!"
+          } else {
+            Write-Output "⚠️ Secrets not found"
+          }
 
       - name: Render Daily SAT Math Shorts (9:16) & Standard Video (16:9) + Upload to YouTube
         run: node daily-pipeline.mjs --render
