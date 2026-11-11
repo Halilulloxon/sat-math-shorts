@@ -238,9 +238,18 @@ export async function uploadShortToYouTube({ videoPath, title, description, priv
   return { uploaded: true, videoId: result.id, url: `https://youtu.be/${result.id}` };
 }
 
-if (import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
+if (process.argv[1] && import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}`) {
   if (process.argv.includes('--auth')) {
     runInteractiveOAuth().catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+  } else if (process.argv.includes('--upload-sample')) {
+    uploadShortToYouTube({
+      videoPath: path.join(PROJECT_DIR, 'sat-math-youtube-shorts.mp4'),
+      title: 'SAT Math 5-Soniyalik Usul! Kvadrat tenglama siri 🔥 #Shorts #SATMath #SATUzbekistan',
+      description: 'SAT Math imtihonida kvadrat tenglama ildizlari yigʻindisini 5 soniyada topish usuli (-b/a)!\n\n🚀 Bizning rasmiy Digital SAT platformamiz — SAT MASTER:\n👉 https://satmaster.halilulloxon.uz\n\n✅ Real Digital SAT Bluebook Adaptive Simulator\n✅ 24/7 AI SAT Math Tutor\n✅ 3,000+ SAT Math savollar\n\n#satmath #sat #math #mathematics #DigitalSAT #SATUzbekistan #Shorts'
+    }).catch((err) => {
       console.error(err);
       process.exit(1);
     });
