@@ -1,0 +1,7 @@
+node_modules/
+frames/
+frames_shorts/
+frames_long/
+audio/
+client_secret.json
+youtube-token.json

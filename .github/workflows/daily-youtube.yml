@@ -1,0 +1,53 @@
+name: Daily SAT Math Video & Shorts (Cloud 24/7)
+
+on:
+  schedule:
+    # Runs every day at 09:00 AM Asia/Tashkent (04:00 UTC) even when your PC is turned off
+    - cron: '0 4 * * *'
+  workflow_dispatch: # Allows manual 1-click run from GitHub Actions tab anytime
+
+permissions:
+  contents: write
+
+jobs:
+  render-and-upload:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies (Playwright + FFmpeg)
+        run: npm install --no-audit --no-fund
+
+      - name: Restore YouTube OAuth Credentials from GitHub Secrets
+        if: env.YOUTUBE_CLIENT_SECRET != '' && env.YOUTUBE_TOKEN != ''
+        env:
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_TOKEN: ${{ secrets.YOUTUBE_TOKEN }}
+        shell: pwsh
+        run: |
+          $env:YOUTUBE_CLIENT_SECRET | Out-File -FilePath "client_secret.json" -Encoding utf8
+          $env:YOUTUBE_TOKEN | Out-File -FilePath "youtube-token.json" -Encoding utf8
+
+      - name: Render Daily SAT Math Shorts (9:16) & Standard Video (16:9) + Upload to YouTube
+        run: node daily-pipeline.mjs --render
+
+      - name: Upload Rendered Videos as GitHub Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-sat-math-videos-${{ github.run_number }}
+          path: daily-outputs/*
+          retention-days: 14
+
+      - name: Commit updated topic history
+        run: |
+          git config user.name "SAT Master Bot"
+          git config user.email "bot@satmaster.halilulloxon.uz"
+          git add topics-history.json daily-outputs/*.json
+          git diff --staged --quiet || git commit -m "chore: update daily SAT Math video topic history"
+          git push

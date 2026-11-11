@@ -1,0 +1,75 @@
+{
+  "id": "vieta-sum",
+  "isPromoSpecial": false,
+  "badge": "⚡ SAT MATH • 5-SONIYALIK USUL",
+  "hook": "Kvadrat tenglamani yechib o'tirmang!",
+  "prompt": "Ildizlar yigʻindisini toping (Sum of solutions):",
+  "equation": "3x² − 18x + 7 = 0",
+  "pills": [
+    "a = 3",
+    "b = −18",
+    "c = 7"
+  ],
+  "slowText": "❌ Oddiy usul (45s):   x = (−b ± √(b² − 4ac)) / 2a",
+  "formulaTitle": "✨ VIYET FORMULASI (ax² + bx + c = 0)",
+  "formulaBody": "Sum of Solutions =  −b / a",
+  "stepTitle": "QIYMATLARNI QOʻYAMIZ:  a = 3  va  b = −18",
+  "step1": "Sum =  −(−18) / 3",
+  "step2": "Sum =  −(−18) / 3  =  18 / 3",
+  "step3": "Sum =  −(−18) / 3  =  18 / 3  =  6",
+  "options": [
+    {
+      "label": "A) −6",
+      "win": false
+    },
+    {
+      "label": "B) 6",
+      "win": true
+    },
+    {
+      "label": "C) 7/3",
+      "win": false
+    },
+    {
+      "label": "D) 18",
+      "win": false
+    }
+  ],
+  "winnerText": "✅ TOʻGʻRI JAVOB: B (5 soniyada!)",
+  "cues": [
+    {
+      "start": 0,
+      "end": 3.3,
+      "text": "SAT imtihonida buni ko'paytuvchiga ajratmang! 🛑"
+    },
+    {
+      "start": 3.3,
+      "end": 5.5,
+      "text": "Diskriminantga 45 soniya vaqt ketadi..."
+    },
+    {
+      "start": 5.5,
+      "end": 8.3,
+      "text": "Viyet qoidasi: Yig'indi = −b / a ⚡"
+    },
+    {
+      "start": 8.3,
+      "end": 11.5,
+      "text": "Bu yerda a = 3 va b = −18 ga teng!"
+    },
+    {
+      "start": 11.5,
+      "end": 14.2,
+      "text": "−(−18) ÷ 3 = +6 (5 soniyada!) 🎯"
+    },
+    {
+      "start": 14.2,
+      "end": 18,
+      "text": "Bepul Bluebook Simulator: satmaster.halilulloxon.uz 🚀"
+    }
+  ],
+  "voiceScript": "Stop factoring every quadratic on the S A T! Skip the slow quadratic formula and use Vietas shortcut: Sum equals negative b over a. Here a is 3 and b is negative 18. Negative negative 18 divided by 3 is positive 6! Practice on our free Bluebook simulator at satmaster dot halilulloxon dot uz!",
+  "shortTitle": "SAT Math 5-Soniyalik Usul! Kvadrat tenglama siri 🔥 #Shorts #SATMath #SATUzbekistan",
+  "longTitle": "SAT Math: Kvadrat Tenglama Ildizlari Yig'indisi (Viyet Teoremasi + SAT Master) | Digital SAT",
+  "ytDescription": "SAT Math imtihonida kvadrat tenglama ildizlari yig'indisini 5 soniyada topish usuli (-b/a)!\n\n🚀 Bizning rasmiy Digital SAT platformamiz — SAT MASTER:\n👉 https://satmaster.halilulloxon.uz\n\n✅ Real Digital SAT Bluebook Adaptive Simulator\n✅ 24/7 AI SAT Math Tutor\n✅ 3,000+ SAT Math savollar va Acing the New SAT kitoblari\n\n#satmath #sat #math #mathematics #DigitalSAT #SATUzbekistan #Shorts"
+}

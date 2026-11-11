@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #070913;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #ffffff;
+  }
+  canvas {
+    display: block;
+    width: 1080px;
+    height: 1920px;
+  }
+</style>
+</head>
+<body>
+<canvas id="stage" width="1080" height="1920"></canvas>
+<script>
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+
+function clamp(v, min = 0, max = 1) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function easeOutCubic(t) {
+  t = clamp(t);
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function easeOutBack(t) {
+  t = clamp(t);
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+window.renderAtTime = function(t) {
+  const W = 1080;
+  const H = 1920;
+
+  // 1. Deep animated dark gradient background
+  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0, '#070B19');
+  bgGrad.addColorStop(0.5, '#0F172A');
+  bgGrad.addColorStop(1, '#090D16');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle animated glowing orbs
+  ctx.save();
+  const orb1Y = 380 + Math.sin(t * 1.5) * 40;
+  const rad1 = ctx.createRadialGradient(220, orb1Y, 20, 220, orb1Y, 420);
+  rad1.addColorStop(0, 'rgba(56, 189, 248, 0.22)');
+  rad1.addColorStop(1, 'rgba(56, 189, 248, 0)');
+  ctx.fillStyle = rad1;
+  ctx.fillRect(0, 0, W, H);
+
+  const orb2Y = 1380 + Math.cos(t * 1.2) * 50;
+  const rad2 = ctx.createRadialGradient(860, orb2Y, 20, 860, orb2Y, 460);
+  rad2.addColorStop(0, 'rgba(168, 85, 247, 0.20)');
+  rad2.addColorStop(1, 'rgba(168, 85, 247, 0)');
+  ctx.fillStyle = rad2;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+
+  // Subtle math grid lines
+  ctx.save();
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
+  ctx.lineWidth = 2;
+  const gridOffset = (t * 25) % 90;
+  for (let x = 0; x < W; x += 90) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+  for (let y = gridOffset; y < H; y += 90) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Top progress bar (YouTube Shorts style)
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.fillRect(0, 0, W, 14);
+  const progGrad = ctx.createLinearGradient(0, 0, W, 0);
+  progGrad.addColorStop(0, '#38BDF8');
+  progGrad.addColorStop(0.5, '#818CF8');
+  progGrad.addColorStop(1, '#34D399');
+  ctx.fillStyle = progGrad;
+  ctx.fillRect(0, 0, W * (t / 18.0), 14);
+
+  // Header Pill Badge
+  const headerP = easeOutBack(t / 0.5);
+  ctx.save();
+  ctx.translate(W / 2, 115);
+  ctx.scale(headerP, headerP);
+  roundRect(ctx, -290, -36, 580, 72, 36);
+  ctx.fillStyle = 'rgba(30, 41, 59, 0.88)';
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#38BDF8';
+  ctx.stroke();
+  ctx.fillStyle = '#38BDF8';
+  ctx.font = '800 30px "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('⚡ SAT MATH • 5-SECOND HACK', 0, 0);
+  ctx.restore();
+
+  // Main Hook Title
+  const titleP = easeOutCubic((t - 0.15) / 0.5);
+  ctx.save();
+  ctx.globalAlpha = titleP;
+  ctx.translate(W / 2, 235 + (1 - titleP) * 30);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '900 68px "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText("DON'T Factor This!", 0, 0);
+  ctx.restore();
+
+  // Problem Card (Always visible after 0.3s)
+  const cardP = easeOutBack((t - 0.3) / 0.6);
+  ctx.save();
+  ctx.translate(W / 2, 470);
+  ctx.scale(cardP, cardP);
+  roundRect(ctx, -460, -165, 920, 330, 36);
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+  ctx.fill();
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+  ctx.stroke();
+
+  // Problem text
+  ctx.fillStyle = '#94A3B8';
+  ctx.font = '600 34px "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('What is the sum of the solutions to:', 0, -90);
+
+  // Equation: 3x² - 18x + 7 = 0
+  ctx.font = '800 74px "Segoe UI", sans-serif';
+  ctx.fillStyle = '#F8FAFC';
+  ctx.fillText('3x² − 18x + 7 = 0', 0, -5);
+
+  // Highlight pills on coefficients a=3 and b=-18 after t >= 8.0s
+  if (t >= 8.0) {
+    ctx.save();
+    ctx.globalAlpha = clamp((t - 8.0) / 0.3);
+    // Pill for a = 3
+    roundRect(ctx, -330, 45, 200, 62, 18);
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+    ctx.fill();
+    ctx.strokeStyle = '#38BDF8';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = '#38BDF8';
+    ctx.font = '800 34px "Segoe UI", sans-serif';
+    ctx.fillText('a = 3', -230, 86);
+
+    // Pill for b = -18
+    roundRect(ctx, -90, 45, 240, 62, 18);
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.2)';
+    ctx.fill();
+    ctx.strokeStyle = '#FBBF24';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = '#FBBF24';
+    ctx.font = '800 34px "Segoe UI", sans-serif';
+    ctx.fillText('b = −18', 30, 86);
+
+    // Pill for c = 7
+    roundRect(ctx, 185, 45, 175, 62, 18);
+    ctx.fillStyle = 'rgba(148, 163, 184, 0.15)';
+    ctx.fill();
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '700 32px "Segoe UI", sans-serif';
+    ctx.fillText('c = 7', 272, 86);
+    ctx.restore();
+  } else {
+    // 4 Answer Options inside card before t=8.0
+    const opts = ['A) −6', 'B) 6', 'C) 7/3', 'D) 18'];
+    for (let i = 0; i < 4; i++) {
+      const ox = -330 + i * 220;
+      roundRect(ctx, ox - 92, 50, 184, 68, 18);
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#E2E8F0';
+      ctx.font = '700 34px "Segoe UI", sans-serif';
+      ctx.fillText(opts[i], ox, 94);
+    }
+  }
+  ctx.restore();
+
+  // SECTION 2 (t = 3.2s to 8.0s): Slow Method vs Vieta's Formula
+  if (t >= 3.2) {
+    const s2P = easeOutCubic((t - 3.2) / 0.5);
+    ctx.save();
+    ctx.globalAlpha = s2P;
+    ctx.translate(W / 2, 745 + (1 - s2P) * 30);
+
+    roundRect(ctx, -460, -65, 920, 130, 26);
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.55)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = '#FCA5A5';
+    ctx.font = '700 34px "Segoe UI", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('❌ Slow Way (45s):   x = (−b ± √(b² − 4ac)) / 2a', -420, 10);
+
+    const strikeP = clamp((t - 3.6) / 0.4);
+    ctx.strokeStyle = '#EF4444';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.moveTo(-60, 0);
+    ctx.lineTo(-60 + 460 * strikeP, 0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Vieta's Formula Card (t >= 4.5s)
+  if (t >= 4.5) {
+    const vP = easeOutBack((t - 4.5) / 0.55);
+    ctx.save();
+    ctx.translate(W / 2, 965);
+    ctx.scale(vP, vP);
+
+    roundRect(ctx, -460, -110, 920, 220, 32);
+    const vGrad = ctx.createLinearGradient(-460, -110, 460, 110);
+    vGrad.addColorStop(0, 'rgba(14, 116, 144, 0.35)');
+    vGrad.addColorStop(1, 'rgba(30, 58, 138, 0.45)');
+    ctx.fillStyle = vGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#38BDF8';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.fillStyle = '#7DD3FC';
+    ctx.font = '800 34px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText("✨ VIETA'S 5-SECOND FORMULA (ax² + bx + c = 0)", 0, -52);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '900 64px "Segoe UI", sans-serif';
+    ctx.fillText('Sum of Solutions =  −b / a', 0, 35);
+    ctx.restore();
+  }
+
+  // SECTION 3 (t >= 8.5s): Step-by-Step Plug In Calculation
+  if (t >= 8.5) {
+    const stepP = easeOutBack((t - 8.5) / 0.55);
+    ctx.save();
+    ctx.translate(W / 2, 1255);
+    ctx.scale(stepP, stepP);
+
+    roundRect(ctx, -460, -120, 920, 240, 32);
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
+    ctx.fill();
+    ctx.strokeStyle = '#FBBF24';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.fillStyle = '#FDE68A';
+    ctx.font = '800 32px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PLUG IN  a = 3   AND   b = −18 :', 0, -64);
+
+    ctx.font = '900 62px "Segoe UI", sans-serif';
+    if (t < 10.5) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('Sum =  −(−18) / 3', 0, 30);
+    } else if (t < 12.0) {
+      ctx.fillStyle = '#FBBF24';
+      ctx.fillText('Sum =  −(−18) / 3  =  18 / 3', 0, 30);
+    } else {
+      ctx.fillStyle = '#34D399';
+      ctx.fillText('Sum =  −(−18) / 3  =  18 / 3  =  6', 0, 30);
+    }
+    ctx.restore();
+  }
+
+  // SECTION 4 (t >= 13.0s): Final Answer Choices + Green Winner Highlight
+  if (t >= 13.0) {
+    const ansP = easeOutBack((t - 13.0) / 0.55);
+    ctx.save();
+    ctx.translate(W / 2, 1525);
+    ctx.scale(ansP, ansP);
+
+    const opts = [
+      { label: 'A) −6', win: false },
+      { label: 'B) 6', win: true },
+      { label: 'C) 7/3', win: false },
+      { label: 'D) 18', win: false }
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      const ox = -345 + i * 230;
+      const isWin = opts[i].win;
+      const pulse = isWin ? 1 + Math.sin((t - 13.0) * 8) * 0.04 : 1;
+
+      ctx.save();
+      ctx.translate(ox, 0);
+      ctx.scale(pulse, pulse);
+      roundRect(ctx, -102, -58, 204, 116, 24);
+      if (isWin) {
+        ctx.fillStyle = '#059669';
+        ctx.fill();
+        ctx.strokeStyle = '#34D399';
+        ctx.lineWidth = 5;
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.75)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = isWin ? '#FFFFFF' : '#94A3B8';
+      ctx.font = (isWin ? '900 44px ' : '700 38px ') + '"Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(opts[i].label, 0, 0);
+      ctx.restore();
+    }
+
+    ctx.fillStyle = '#34D399';
+    ctx.font = '900 40px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('✅ CORRECT ANSWER: B (Solved in 5 Seconds!)', 0, 108);
+    ctx.restore();
+  }
+
+  // Dynamic Subtitles Bar at the bottom (y = 1765)
+  const cues = [
+    { start: 0.0, end: 3.3, text: "Stop factoring every quadratic on the SAT! 🛑" },
+    { start: 3.3, end: 5.5, text: "Skip the slow quadratic formula..." },
+    { start: 5.5, end: 8.3, text: "Use Vieta's Shortcut: Sum = −b / a ⚡" },
+    { start: 8.3, end: 11.5, text: "Here a = 3 and b = −18. Plug them in!" },
+    { start: 11.5, end: 14.2, text: "−(−18) ÷ 3 = +6 in 5 seconds! 🎯" },
+    { start: 14.2, end: 18.0, text: "Answer is B! Follow for 800 SAT Math 🚀" }
+  ];
+  const activeCue = cues.find(function(c) { return t >= c.start && t <= c.end; });
+  if (activeCue) {
+    ctx.save();
+    roundRect(ctx, 70, 1715, 940, 110, 28);
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.88)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = '#F8FAFC';
+    ctx.font = '800 40px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(activeCue.text, W / 2, 1770);
+    ctx.restore();
+  }
+};
+</script>
+</body>
+</html>
