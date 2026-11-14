@@ -3,7 +3,8 @@
     "vieta-sum",
     "vieta-product",
     "satmaster-spotlight",
-    "system-elimination"
+    "system-elimination",
+    "desmos-intersection"
   ],
   "runs": [
     {
@@ -41,6 +42,10 @@
     {
       "id": "system-elimination",
       "date": "2026-11-13T12:04:05.283Z"
+    },
+    {
+      "id": "desmos-intersection",
+      "date": "2026-11-14T11:22:29.434Z"
     }
   ]
 }
