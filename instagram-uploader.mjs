@@ -287,97 +287,66 @@ async function uploadViaBrowserSession({ videoPath, caption }) {
     }
 
     // Click "New post" / "Create" icon in left sidebar
-    const createSelectors = [
-      'svg[aria-label="New post"]',
-      'svg[aria-label="Create"]',
-      'a:has-text("Create")',
-      'span:has-text("Create")',
-    ];
-    let clickedCreate = false;
-    for (const sel of createSelectors) {
-      const loc = page.locator(sel).first();
-      if (await loc.isVisible({ timeout: 2500 }).catch(() => false)) {
-        await loc.click();
-        clickedCreate = true;
-        break;
-      }
-    }
-    if (!clickedCreate) {
-      throw new Error('Could not find Instagram "Create / New post" button on page.');
-    }
-
+    const createLink = page.locator('a:has(svg[aria-label="New post"]), a:has(svg[aria-label="Create"]), svg[aria-label="New post"], svg[aria-label="Create"]').first();
+    await createLink.waitFor({ state: 'visible', timeout: 15000 });
+    await createLink.click();
     await page.waitForTimeout(1500);
 
-    // If submenu appears ("Post" | "Live video" | etc.), click "Post"
-    try {
-      const postSubItem = page.locator('span:text-is("Post"), a:has-text("Post")').first();
-      if (await postSubItem.isVisible({ timeout: 2000 })) {
-        await postSubItem.click();
-        await page.waitForTimeout(1000);
-      }
-    } catch {}
+    // Professional account submenu: "Post" | "Live video" | "Ad" -> click "Post"
+    const postSubItem = page.locator('a[role="link"]:has(span:text-is("Post")), span:text-is("Post")').first();
+    if (await postSubItem.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await postSubItem.click();
+      await page.waitForTimeout(2500);
+    }
 
     // Set MP4 file on `<input type="file">` inside the Create modal
     const fileInput = page.locator('input[type="file"]').first();
+    await fileInput.waitFor({ state: 'attached', timeout: 15000 });
     await fileInput.setInputFiles(videoPath);
-    await page.waitForTimeout(3500);
+    await page.waitForTimeout(4500);
 
     // Dismiss "Video posts are now shared as reels" popup if shown
     try {
-      const okReelBtn = page.getByRole('button', { name: 'OK', exact: true }).first();
+      const okReelBtn = page.locator('[role="dialog"] button:has-text("OK"), [role="dialog"] div[role="button"]:has-text("OK")').first();
       if (await okReelBtn.isVisible({ timeout: 3000 })) {
         await okReelBtn.click();
         await page.waitForTimeout(1000);
       }
     } catch {}
 
-    // Optional: set 9:16 Original aspect ratio if crop button is present
-    try {
-      const cropBtn = page.locator('svg[aria-label="Select crop"]').first();
-      if (await cropBtn.isVisible({ timeout: 2000 })) {
-        await cropBtn.click();
-        await page.waitForTimeout(600);
-        const origOpt = page.locator('span:text-is("9:16"), span:text-is("Original")').first();
-        if (await origOpt.isVisible({ timeout: 1500 })) {
-          await origOpt.click();
-          await page.waitForTimeout(600);
-        }
-      }
-    } catch {}
-
     // Click "Next" (Crop step -> Trim/Cover step)
-    const nextBtn1 = page.getByRole('button', { name: 'Next', exact: true }).first();
+    const nextBtn1 = page.locator('[role="dialog"] div[role="button"]:text-is("Next"), [role="dialog"] button:text-is("Next")').first();
     await nextBtn1.waitFor({ state: 'visible', timeout: 15000 });
     await nextBtn1.click();
     await page.waitForTimeout(2500);
 
     // Click "Next" (Trim/Cover step -> Caption & Share step)
-    const nextBtn2 = page.getByRole('button', { name: 'Next', exact: true }).first();
+    const nextBtn2 = page.locator('[role="dialog"] div[role="button"]:text-is("Next"), [role="dialog"] button:text-is("Next")').first();
     await nextBtn2.waitFor({ state: 'visible', timeout: 15000 });
     await nextBtn2.click();
     await page.waitForTimeout(2500);
 
     // Fill caption in contenteditable div
     try {
-      const captionBox = page.locator('div[aria-label="Write a caption..."][contenteditable="true"], div[role="textbox"][contenteditable="true"]').first();
+      const captionBox = page.locator('[role="dialog"] div[aria-label="Write a caption..."], [role="dialog"] div[role="textbox"]').first();
       if (await captionBox.isVisible({ timeout: 5000 })) {
         await captionBox.click();
-        await captionBox.fill(caption);
+        await page.keyboard.type(caption);
         await page.waitForTimeout(1000);
       }
     } catch (e) {
       console.warn('Caption fill warning:', e.message);
     }
 
-    // Click "Share"
-    const shareBtn = page.getByRole('button', { name: 'Share', exact: true }).first();
+    // Click exact "Share" button inside dialog (avoids "Share to Threads")
+    const shareBtn = page.locator('[role="dialog"] div[role="button"]:text-is("Share"), [role="dialog"] button:text-is("Share")').first();
     await shareBtn.waitFor({ state: 'visible', timeout: 15000 });
     await shareBtn.click();
 
     console.log('⏳ Waiting for Instagram Reel upload & processing to finish...');
-    // Wait until "Your reel has been shared." or "Post shared" appears
+    // Wait until "Your reel has been shared." or "Shared reel" appears
     const sharedConfirmation = page.locator(
-      'text=/Your reel has been shared|Post shared|Reel shared|Your post has been shared/i'
+      'text=/Your reel has been shared|Shared reel|Post shared|Reel shared/i'
     ).first();
     await sharedConfirmation.waitFor({ state: 'visible', timeout: 120000 });
 
