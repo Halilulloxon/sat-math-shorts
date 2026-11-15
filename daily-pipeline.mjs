@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { uploadShortToYouTube } from './youtube-uploader.mjs';
+import { uploadReelToInstagram } from './instagram-uploader.mjs';
 
 import { fileURLToPath } from 'node:url';
 
@@ -27,6 +28,8 @@ const PROJECT_DIR = __dirname;
 const HISTORY_FILE = path.join(PROJECT_DIR, 'topics-history.json');
 const OUTPUTS_DIR = path.join(PROJECT_DIR, 'daily-outputs');
 const TOKEN_FILE = path.join(PROJECT_DIR, 'youtube-token.json');
+const IG_SESSION_FILE = path.join(PROJECT_DIR, 'instagram-session.json');
+const IG_TOKEN_FILE = path.join(PROJECT_DIR, 'instagram-token.json');
 
 const SATMASTER_PROMO = {
   domain: 'satmaster.halilulloxon.uz',
@@ -771,6 +774,8 @@ async function main() {
     topicId: topic.id,
     isPromoSpecial: topic.isPromoSpecial,
     channel: 'https://www.youtube.com/@SATMATH-b5n',
+    instagram: 'https://www.instagram.com/sat_math_sat/',
+    instagramEmail: 'halilullohayotullo0608@gmail.com',
     promotedProject: SATMASTER_PROMO,
     shorts: {
       title: topic.shortTitle,
@@ -793,6 +798,7 @@ async function main() {
   console.log(`Selected daily topic: ${topic.id}`);
   console.log(`- Shorts Title:   ${topic.shortTitle}`);
   console.log(`- Video Title:    ${topic.longTitle}`);
+  console.log(`- Instagram:      @sat_math_sat (halilullohayotullo0608@gmail.com)`);
   console.log(`- Promoted Site:  ${SATMASTER_PROMO.url}`);
   console.log(`- Metadata saved: ${metaJson}`);
 
@@ -808,8 +814,17 @@ async function main() {
       title: topic.longTitle,
       description: topic.ytDescription
     });
-  } else {
-    console.log('Ready! (Pass --render to render both MP4s, and add youtube-token.json for automatic YouTube upload).');
+  } else if (!shouldRender) {
+    console.log('Ready! (Pass --render to render both MP4s, and add youtube-token.json / instagram-session.json for automatic uploads).');
+  }
+
+  if ((existsSync(IG_SESSION_FILE) || existsSync(IG_TOKEN_FILE)) && shouldRender) {
+    console.log('Uploading Daily 9:16 Reel to Instagram (@sat_math_sat)...');
+    const igCaption = `${topic.shortTitle.replace(/#Shorts/gi, '#Reels')}\n\n${topic.ytDescription}\n\n📲 Follow @sat_math_sat for daily SAT Math hacks! #sat_math_sat #instagramreels`;
+    await uploadReelToInstagram({
+      videoPath: shortMp4,
+      caption: igCaption
+    });
   }
 }
 

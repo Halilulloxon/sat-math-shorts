@@ -24,10 +24,12 @@ jobs:
       - name: Install dependencies (Playwright + FFmpeg)
         run: npm install --no-audit --no-fund
 
-      - name: Restore YouTube OAuth Credentials from GitHub Secrets
+      - name: Restore YouTube & Instagram Credentials from GitHub Secrets
         env:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_TOKEN: ${{ secrets.YOUTUBE_TOKEN }}
+          INSTAGRAM_SESSION: ${{ secrets.INSTAGRAM_SESSION }}
+          INSTAGRAM_TOKEN: ${{ secrets.INSTAGRAM_TOKEN }}
         shell: pwsh
         run: |
           if ($env:YOUTUBE_CLIENT_SECRET -and $env:YOUTUBE_TOKEN) {
@@ -35,10 +37,18 @@ jobs:
             [System.IO.File]::WriteAllText("$PWD\youtube-token.json", $env:YOUTUBE_TOKEN)
             Write-Output "✅ YouTube OAuth credentials restored from GitHub Secrets!"
           } else {
-            Write-Output "⚠️ Secrets not found"
+            Write-Output "⚠️ YouTube Secrets not found"
+          }
+          if ($env:INSTAGRAM_SESSION) {
+            [System.IO.File]::WriteAllText("$PWD\instagram-session.json", $env:INSTAGRAM_SESSION)
+            Write-Output "✅ Instagram session (@sat_math_sat) restored from GitHub Secrets!"
+          }
+          if ($env:INSTAGRAM_TOKEN) {
+            [System.IO.File]::WriteAllText("$PWD\instagram-token.json", $env:INSTAGRAM_TOKEN)
+            Write-Output "✅ Instagram Graph API token restored from GitHub Secrets!"
           }
 
-      - name: Render Daily SAT Math Shorts (9:16) & Standard Video (16:9) + Upload to YouTube
+      - name: Render Daily SAT Math Shorts (9:16) & Standard Video (16:9) + Upload to YouTube & Instagram (@sat_math_sat)
         run: node daily-pipeline.mjs --render
 
       - name: Upload Rendered Videos as GitHub Artifact

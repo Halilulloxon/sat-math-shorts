@@ -5,3 +5,5 @@ frames_long/
 audio/
 client_secret.json
 youtube-token.json
+instagram-session.json
+instagram-token.json
