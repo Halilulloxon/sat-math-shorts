@@ -1,6 +1,7 @@
 {
   "usedIds": [
-    "vieta-sum"
+    "vieta-sum",
+    "vieta-product"
   ],
   "runs": [
     {
@@ -46,6 +47,10 @@
     {
       "id": "vieta-sum",
       "date": "2026-11-15T11:52:49.545Z"
+    },
+    {
+      "id": "vieta-product",
+      "date": "2026-11-16T12:37:28.729Z"
     }
   ]
 }
